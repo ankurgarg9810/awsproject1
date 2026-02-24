@@ -1,51 +1,49 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
-import TaskForm from "./TaskForm";
-import TaskCard from "./TaskCard";
+import TaskTable from "./TaskTable";
+import TaskModal from "./TaskModal";
+import { createTask, getTasks } from "../services/api";
 
 function Dashboard() {
   const [tasks, setTasks] = useState([]);
+  const [open, setOpen] = useState(false);
 
-  const addTask = (task) => {
-    setTasks([task, ...tasks]);
+  // 🔵 STEP: Fetch tasks on load
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  const fetchTasks = async () => {
+    try {
+      const res = await getTasks();
+      setTasks(res.data);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const toggleStatus = (id) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === id
-          ? {
-              ...task,
-              status:
-                task.status === "Pending" ? "Completed" : "Pending",
-            }
-          : task
-      )
-    );
-  };
-
-  const deleteTask = (id) => {
-    setTasks(tasks.filter((task) => task.id !== id));
+  // 🔵 STEP: Add task
+  const handleAddTask = async (title) => {
+    try {
+      await createTask({ title });
+      fetchTasks();
+      setOpen(false);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
-    <>
-      <Navbar />
-      <div className="container">
-        <TaskForm addTask={addTask} />
-        <div className="task-list">
-          {tasks.length === 0 && <p>No tasks yet 🚀</p>}
-          {tasks.map((task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              toggleStatus={toggleStatus}
-              deleteTask={deleteTask}
-            />
-          ))}
-        </div>
+    <div className="layout">
+      <Sidebar />
+      <div className="main">
+        <Navbar openModal={() => setOpen(true)} />
+        <TaskTable tasks={tasks} />
       </div>
-    </>
+
+      {open && <TaskModal close={() => setOpen(false)} add={handleAddTask} />}
+    </div>
   );
 }
 

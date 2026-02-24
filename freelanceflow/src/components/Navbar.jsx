@@ -1,11 +1,12 @@
-function Navbar() {
+function Navbar({ openModal }) {
   return (
-    <nav className="navbar">
-      <h2>FreelanceFlow</h2>
-      <div className="user">
-        <span>Welcome, Freelancer 👋</span>
-      </div>
-    </nav>
+    <div className="navbar">
+      <h3>Dashboard</h3>
+
+      <button className="primary-btn" onClick={openModal}>
+        + Add Task
+      </button>
+    </div>
   );
 }
 
